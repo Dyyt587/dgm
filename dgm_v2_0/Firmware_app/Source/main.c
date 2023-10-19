@@ -154,11 +154,11 @@ static void ADC0_init(void)
     
     adc_mode_config(ADC_DAUL_INSERTED_PARALLEL);
     
-    adc_special_function_config(ADC0, ADC_SCAN_MODE, DISABLE);
-    adc_special_function_config(ADC0, ADC_CONTINUOUS_MODE, ENABLE);
-    adc_special_function_config(ADC0, ADC_INSERTED_CHANNEL_AUTO, DISABLE);
-    adc_resolution_config(ADC0, ADC_RESOLUTION_12B);
-    adc_data_alignment_config(ADC0, ADC_DATAALIGN_RIGHT);
+    adc_special_function_config(ADC0, ADC_SCAN_MODE, DISABLE);//adc扫描模式
+    adc_special_function_config(ADC0, ADC_CONTINUOUS_MODE, ENABLE);//连续采样
+    adc_special_function_config(ADC0, ADC_INSERTED_CHANNEL_AUTO, DISABLE);//关闭自动插入通道
+    adc_resolution_config(ADC0, ADC_RESOLUTION_12B);//12bit分辨率
+    adc_data_alignment_config(ADC0, ADC_DATAALIGN_RIGHT);//右对齐
     
     /* ADC DMA function enable */
     adc_dma_mode_enable(ADC0);
@@ -166,11 +166,11 @@ static void ADC0_init(void)
     /* ADC inserted channel config */
     adc_channel_length_config(ADC0, ADC_INSERTED_CHANNEL, 1);
     // IA - PA0 - ADC01_IN0
-    adc_inserted_channel_config(ADC0, 0, ADC_CHANNEL_0, ADC_SAMPLETIME_7POINT5);
+    adc_inserted_channel_config(ADC0, 0, ADC_CHANNEL_0, ADC_SAMPLETIME_7POINT5);//7.5时钟周期采样
     
     /* ADC inserted trigger config */
-    adc_external_trigger_source_config(ADC0, ADC_INSERTED_CHANNEL, ADC0_1_EXTTRIG_INSERTED_T0_CH3); 
-    adc_external_trigger_config(ADC0, ADC_INSERTED_CHANNEL, ENABLE);
+    adc_external_trigger_source_config(ADC0, ADC_INSERTED_CHANNEL, ADC0_1_EXTTRIG_INSERTED_T0_CH3); //设置t0 ch3 触发
+    adc_external_trigger_config(ADC0, ADC_INSERTED_CHANNEL, ENABLE);    //启动触发源                            
     
     /* ADC regular channel config */
     adc_channel_length_config(ADC0, ADC_REGULAR_CHANNEL, 1);
@@ -178,7 +178,7 @@ static void ADC0_init(void)
     adc_regular_channel_config(ADC0, 0, ADC_CHANNEL_3, ADC_SAMPLETIME_7POINT5);
     
     /* ADC regular trigger config */
-    adc_external_trigger_source_config(ADC0, ADC_REGULAR_CHANNEL, ADC0_1_EXTTRIG_REGULAR_NONE); 
+    adc_external_trigger_source_config(ADC0, ADC_REGULAR_CHANNEL, ADC0_1_EXTTRIG_REGULAR_NONE); //不进行特殊触发
     adc_external_trigger_config(ADC0, ADC_REGULAR_CHANNEL, ENABLE);
 }
 
@@ -204,6 +204,7 @@ static void ADC1_init(void)
     adc_external_trigger_config(ADC1, ADC_INSERTED_CHANNEL, ENABLE);
 }
 
+//用于mos管控制的定时器
 static void TIMER0_init(void)
 {
     timer_parameter_struct timer_initpara;
@@ -261,6 +262,7 @@ static void TIMER0_init(void)
     timer_break_config(TIMER0, &timer_breakpara);
 }
 
+//推测用于定时任务使用
 static void TIMER1_init(void)
 {
     // TIMER1CLK = SystemCoreClock/60000 = 2KHz, the period is 500 us
@@ -444,8 +446,9 @@ static void CAN0_init(int baudrate)
 
 int main(void)
 {
+    //关中断以保证安全
     __disable_irq();
-
+    //初始化一切
     RCU_init();
     GPIO_init();
     SPI0_init();
@@ -459,6 +462,7 @@ int main(void)
     NVIC_init();
     WATCH_DOG_init();
     
+    //
     if(0 == USR_CONFIG_read_config()){
         printf("Config loaded\n\r");
     }else{
@@ -476,9 +480,9 @@ int main(void)
     
     CAN_set_node_id(UsrConfig.node_id);
     CAN0_init(UsrConfig.can_baudrate);
-    
+    //////////
     MCT_init();
-    FOC_init();
+    FOC_init();//foc 控制变量初始化
     PWMC_init();
     ENCODER_init();
     CONTROLLER_init();

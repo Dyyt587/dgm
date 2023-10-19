@@ -34,11 +34,11 @@ void ANTICOGGING_start(void)
     mNumber = 0;
     mLoopCount = 0;
     AnticoggingValid = false;
-    USR_CONFIG_set_default_cogging_map();
+    USR_CONFIG_set_default_cogging_map();//齿槽转矩
 }
 
 void ANTICOGGING_end(void)
-{
+{ 
     FOC_disarm();
     
     if(!AnticoggingValid){
@@ -66,7 +66,7 @@ void ANTICOGGING_loop(void)
             pos_ref -= 1.0f;
         }
         Controller.input_position = pos_ref;
-    }else if(mNumber <= (gap_number + COGGING_MAP_NUM)){
+    }else if(mNumber <= (gap_number + COGGING_MAP_NUM)){ 
         float torque = Foc.i_q_filt * UsrConfig.torque_constant;
         int16_t tmp = (int16_t)(torque * 5000.0f);
         int16_t index = nearbyintf(COGGING_MAP_NUM * Controller.input_position);

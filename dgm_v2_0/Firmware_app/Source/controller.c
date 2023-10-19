@@ -83,7 +83,7 @@ void CONTROLLER_sync_callback(void)
     StatuswordOld.status.target_reached = 0;
 }
 
-void CONTROLLER_init(void)
+void ONTROLLER_init(void)
 {
     CONTROLLER_update_input_pos_filter_gain(UsrConfig.position_filter_bw);
 }

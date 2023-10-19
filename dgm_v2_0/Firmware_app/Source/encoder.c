@@ -54,7 +54,7 @@ bool ENCODER_sample(void)
     static const uint32_t timeout_cnt_max = 10;
     
     // CS
-    NCS_RESET();
+    NCS_RESET();//开始通信
 
     timeout_cnt = 0;
     while(0 == (SPI_STAT(SPI0) & SPI_FLAG_TBE)){ if(timeout_cnt ++ > timeout_cnt_max){goto TIMEOUT;}}
@@ -89,11 +89,11 @@ bool ENCODER_sample(void)
     data[2] = ((uint16_t)SPI_DATA(SPI0));
     
     // NCS
-    NCS_SET();
+    NCS_SET();//传输0x83 接收三个字节
     
     if(MT6825.rx_err_count){
         MT6825.rx_err_count --;
-    }
+    }//通讯正常一次就减一次数据接受错误
     
     // check pc1
     pc1 = (data[0]<<8) | data[1];
@@ -146,7 +146,7 @@ TIMEOUT:
 
 void ENCODER_loop(void)
 {
-    if(ENCODER_sample()){
+    if(ENCODER_sample()){//读编码器数据
         if(UsrConfig.encoder_dir == +1){
             Encoder.raw = MT6825.angle;
         }else{
@@ -154,7 +154,7 @@ void ENCODER_loop(void)
         }
     }
 
-    /* Linearization */
+    /* Linearization *///线性化   
     int off_1 = UsrConfig.offset_lut[(Encoder.raw)>>11];                                        // lookup table lower entry
     int off_2 = UsrConfig.offset_lut[((Encoder.raw>>11)+1)%128];                                // lookup table higher entry
     int off_interp = off_1 + ((off_2 - off_1)*(Encoder.raw - ((Encoder.raw>>11)<<11))>>11);        // Interpolate between lookup table entries
@@ -192,7 +192,7 @@ void ENCODER_loop(void)
     }
     
     // run encoder count interpolation
-    // if we are stopped, make sure we don't randomly drift
+    // if we are stopped, make sure we don't r  andomly drift
     if (snap_to_zero_vel) {
         Encoder.interpolation = 0.5f;
     // reset interpolation if encoder edge comes

@@ -40,7 +40,7 @@ void CAN_set_node_id(uint8_t nodeID)
 {
     mNodeID = nodeID;
 }
-
+//定时发送心跳信息
 void CAN_comm_loop(void)
 {
     // rx heartbeat timeout check
@@ -68,8 +68,8 @@ void CAN_comm_loop(void)
 void CAN_receive_callback(void)
 {
     CanFrame rxframe;
-    while(can_rx(&rxframe)){
-        parse_frame(&rxframe);
+    while(can_rx(&rxframe)){//fifo中获取一包数据
+        parse_frame(&rxframe);//解析数据
     }
 }
 
@@ -229,7 +229,7 @@ static bool can_tx(CanFrame *tx_frame)
     
     return true;
 }
-
+//接收can数据
 static bool can_rx(CanFrame *rx_frame)
 {
     if ((CAN_RFIFO0(CAN0) & CAN_RFIF_RFL_MASK) != 0) {
@@ -271,7 +271,7 @@ static void parse_frame(CanFrame *frame)
     CAN_reset_rx_timeout();
     
     switch(frame->id & CMD_BIT){
-        case CAN_CMD_MOTOR_DISABLE:
+        case CAN_CMD_MOTOR_DISABLE://关电机
             if(frame->dlc == 0){
                 ret = MCT_set_state(IDLE);
                 int32_to_data(ret, &frame->data[0]);
@@ -280,7 +280,7 @@ static void parse_frame(CanFrame *frame)
             }
             break;
         
-        case CAN_CMD_MOTOR_ENABLE:
+        case CAN_CMD_MOTOR_ENABLE://运行电机
             if(frame->dlc == 0){
                 ret = MCT_set_state(RUN);
                 int32_to_data(ret, &frame->data[0]);
@@ -289,7 +289,7 @@ static void parse_frame(CanFrame *frame)
             }
             break;
 
-        case CAN_CMD_SET_TORQUE:
+        case CAN_CMD_SET_TORQUE://设置力矩
             if(frame->dlc == 4){
                 if(UsrConfig.invert_motor_dir){
                     Controller.input_torque_buffer = -data_to_float(&frame->data[0]);
@@ -302,7 +302,7 @@ static void parse_frame(CanFrame *frame)
             }
             break;
             
-        case CAN_CMD_SET_VELOCITY:
+        case CAN_CMD_SET_VELOCITY://设置速度
             if(frame->dlc == 4){
                 if(UsrConfig.invert_motor_dir){
                     Controller.input_velocity_buffer = -data_to_float(&frame->data[0]);
@@ -315,7 +315,7 @@ static void parse_frame(CanFrame *frame)
             }
             break;
         
-       case CAN_CMD_SET_POSITION:
+       case CAN_CMD_SET_POSITION://设置位置
             if(frame->dlc == 4){
                 if(UsrConfig.invert_motor_dir){
                     Controller.input_position_buffer = -data_to_float(&frame->data[0]);
@@ -328,7 +328,7 @@ static void parse_frame(CanFrame *frame)
             }
             break;
         
-        case CAN_CMD_SYNC:
+        case CAN_CMD_SYNC://设置同步
             if(frame->dlc == 0){
                 if(UsrConfig.sync_target_enable){
                     CONTROLLER_sync_callback();
@@ -336,7 +336,7 @@ static void parse_frame(CanFrame *frame)
             }
             break;
         
-        case CAN_CMD_CALIB_START:
+        case CAN_CMD_CALIB_START://开始校准
             if(frame->dlc == 0){
                 ret = MCT_set_state(CALIBRATION);
                 int32_to_data(ret, &frame->data[0]);
@@ -345,7 +345,7 @@ static void parse_frame(CanFrame *frame)
             }
             break;
         
-        case CAN_CMD_CALIB_ABORT:
+        case CAN_CMD_CALIB_ABORT://结束校准
             if(frame->dlc == 0){
                 ret = MCT_set_state(IDLE);
                 int32_to_data(ret, &frame->data[0]);
@@ -354,7 +354,7 @@ static void parse_frame(CanFrame *frame)
             }
             break;
         
-        case CAN_CMD_ANTICOGGING_START:
+        case CAN_CMD_ANTICOGGING_START://开始齿槽补偿校准
             if(frame->dlc == 0){
                 ret = MCT_set_state(ANTICOGGING);
                 int32_to_data(ret, &frame->data[0]);
@@ -363,7 +363,7 @@ static void parse_frame(CanFrame *frame)
             }
             break;
         
-        case CAN_CMD_ANTICOGGING_ABORT:
+        case CAN_CMD_ANTICOGGING_ABORT://结束齿槽补偿校准
             if(frame->dlc == 0){
                 ret = MCT_set_state(IDLE);
                 int32_to_data(ret, &frame->data[0]);
@@ -372,7 +372,7 @@ static void parse_frame(CanFrame *frame)
             }
             break;
             
-        case CAN_CMD_SET_HOME:
+        case CAN_CMD_SET_HOME://设置原点
             if(frame->dlc == 0){
                 ret = CONTROLLER_set_home();
                 int32_to_data(ret, &frame->data[0]);
@@ -381,7 +381,7 @@ static void parse_frame(CanFrame *frame)
             }
             break;
  
-        case CAN_CMD_ERROR_RESET:
+        case CAN_CMD_ERROR_RESET://错误复位
             if(frame->dlc == 0){
                 MCT_reset_error();
                 int32_to_data(0, &frame->data[0]);
@@ -390,7 +390,7 @@ static void parse_frame(CanFrame *frame)
             }
             break;
 
-        case CAN_CMD_GET_STATUSWORD:
+        case CAN_CMD_GET_STATUSWORD://获取状态
             if(frame->dlc == 0){
                 uint32_to_data(StatuswordNew.status.status_code, &frame->data[0]);
                 uint32_to_data(StatuswordNew.errors.errors_code, &frame->data[4]);
@@ -399,7 +399,7 @@ static void parse_frame(CanFrame *frame)
             }
             break;
         
-        case CAN_CMD_GET_TORQUE:
+        case CAN_CMD_GET_TORQUE://获取力矩
             if(frame->dlc == 0){
                 if(UsrConfig.invert_motor_dir){
                     float_to_data(-Foc.i_q_filt * UsrConfig.torque_constant, &frame->data[0]);
@@ -411,7 +411,7 @@ static void parse_frame(CanFrame *frame)
             }
             break;
             
-        case CAN_CMD_GET_VELOCITY:
+        case CAN_CMD_GET_VELOCITY://获取速度
             if(frame->dlc == 0){
                 if(UsrConfig.invert_motor_dir){
                     float_to_data(-Encoder.vel, &frame->data[0]);
@@ -423,7 +423,7 @@ static void parse_frame(CanFrame *frame)
             }
             break;
             
-        case CAN_CMD_GET_POSITION:
+        case CAN_CMD_GET_POSITION://获取位置
             if(frame->dlc == 0){
                 if(UsrConfig.invert_motor_dir){
                     float_to_data(-Encoder.pos, &frame->data[0]);
@@ -435,7 +435,7 @@ static void parse_frame(CanFrame *frame)
             }
             break;
             
-        case CAN_CMD_GET_I_Q:
+        case CAN_CMD_GET_I_Q://获取电流
             if(frame->dlc == 0){
                 if(UsrConfig.invert_motor_dir){
                     float_to_data(-Foc.i_q_filt, &frame->data[0]);
@@ -447,7 +447,7 @@ static void parse_frame(CanFrame *frame)
             }
             break;
         
-        case CAN_CMD_GET_VBUS:
+        case CAN_CMD_GET_VBUS://获取总线电压
             if(frame->dlc == 0){
                 float_to_data(Foc.v_bus_filt, &frame->data[0]);
                 frame->dlc = 4;
@@ -455,7 +455,7 @@ static void parse_frame(CanFrame *frame)
             }
             break;
         
-        case CAN_CMD_GET_IBUS:
+        case CAN_CMD_GET_IBUS://获取总线电流
             if(frame->dlc == 0){
                 float_to_data(Foc.i_bus_filt, &frame->data[0]);
                 frame->dlc = 4;
@@ -463,7 +463,7 @@ static void parse_frame(CanFrame *frame)
             }
             break;
         
-        case CAN_CMD_GET_POWER:
+        case CAN_CMD_GET_POWER://获取功率
             if(frame->dlc == 0){
                 float_to_data(Foc.power_filt, &frame->data[0]);
                 frame->dlc = 4;
@@ -471,7 +471,7 @@ static void parse_frame(CanFrame *frame)
             }
             break;
 
-        case CAN_CMD_SET_CONFIG:
+        case CAN_CMD_SET_CONFIG://设置配置
             if(frame->dlc == 8){
                 config_callback(frame->data, true);
                 frame->dlc = 8;
@@ -479,7 +479,7 @@ static void parse_frame(CanFrame *frame)
             }
             break;
         
-        case CAN_CMD_GET_CONFIG:
+        case CAN_CMD_GET_CONFIG://获取配置
             if(frame->dlc == 4){
                 config_callback(frame->data, false);
                 frame->dlc = 8;
@@ -487,7 +487,7 @@ static void parse_frame(CanFrame *frame)
             }
             break;
         
-        case CAN_CMD_SAVE_ALL_CONFIG:
+        case CAN_CMD_SAVE_ALL_CONFIG://保存所有配置
             if(frame->dlc == 0){
                 ret = 0;
                 ret += USR_CONFIG_save_config();
@@ -498,7 +498,7 @@ static void parse_frame(CanFrame *frame)
             }
             break;
         
-        case CAN_CMD_RESET_ALL_CONFIG:
+        case CAN_CMD_RESET_ALL_CONFIG://重置所有配置
             if(frame->dlc == 0){
                 if(MCT_get_state() == IDLE){
                     USR_CONFIG_set_default_config();
@@ -513,7 +513,7 @@ static void parse_frame(CanFrame *frame)
             }
             break;
 
-        case CAN_CMD_GET_FW_VERSION:
+        case CAN_CMD_GET_FW_VERSION://获取固件版本
             if(frame->dlc == 0){
                 int32_to_data(FW_VERSION_MAJOR, &frame->data[0]);
                 int32_to_data(FW_VERSION_MINOR, &frame->data[4]);
@@ -522,7 +522,7 @@ static void parse_frame(CanFrame *frame)
             }
             break;
         
-        case CAN_CMD_WRITE_APP_BACK_START:
+        case CAN_CMD_WRITE_APP_BACK_START://开始写回app
             if(frame->dlc == 0){
                 ret = DFU_write_app_back_start();
                 int32_to_data(ret, &frame->data[0]);
@@ -531,11 +531,11 @@ static void parse_frame(CanFrame *frame)
             }
             break;
         
-        case CAN_CMD_WRITE_APP_BACK:
+        case CAN_CMD_WRITE_APP_BACK://写回app
             DFU_write_app_back(&frame->data[0], frame->dlc);
             break;
         
-        case CAN_CMD_CHECK_APP_BACK:
+        case CAN_CMD_CHECK_APP_BACK://检查app
             if(frame->dlc == 8){
                 ret = DFU_check_app_back(data_to_uint32(&frame->data[0]), data_to_uint32(&frame->data[4]));
                 int32_to_data(ret, &frame->data[0]);
@@ -544,7 +544,7 @@ static void parse_frame(CanFrame *frame)
             }
             break;
         
-        case CAN_CMD_DFU_START:
+        case CAN_CMD_DFU_START://启动dfu
             if(frame->dlc == 0){
                 watch_dog_feed();
                 DFU_jump_bootloader();
@@ -560,7 +560,7 @@ static void parse_frame(CanFrame *frame)
     }
 }
 
-static void config_callback(uint8_t *data, bool isSet)
+static void config_callback(uint8_t *data, bool isSet)//设置保存到flash并更新配置
 {
     int32_t idx = data_to_int32(data) - 1;
     int32_t config_number = sizeof(tUsrConfig)/4 - 132;

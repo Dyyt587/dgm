@@ -107,7 +107,7 @@ int USR_CONFIG_erease_config(void)
 int USR_CONFIG_read_config(void)
 {
     int state = 0;
-
+    //直接拷贝flash数据
     memcpy(&UsrConfig, (uint8_t*)USR_CONFIG_ADDR, sizeof(tUsrConfig));
 
     uint32_t crc;

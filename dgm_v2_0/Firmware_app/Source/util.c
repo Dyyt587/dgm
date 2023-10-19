@@ -219,13 +219,13 @@ static const unsigned int crc32_table[256] =
     0xafb010b1, 0xab710d06, 0xa6322bdf, 0xa2f33668,
     0xbcb4666d, 0xb8757bda, 0xb5365d03, 0xb1f740b4
 };
-
+//clark变幻
 inline void clarke_transform(float Ia, float Ib, float Ic, float *Ialpha, float *Ibeta)
 {
     *Ialpha = Ia;
     *Ibeta  = (Ib - Ic) * ONE_BY_SQRT3;
 }
-
+//park变幻
 inline void park_transform(float Ialpha, float Ibeta, float Theta, float *Id, float *Iq)
 {
     float s = sin_f32(Theta);
@@ -233,7 +233,7 @@ inline void park_transform(float Ialpha, float Ibeta, float Theta, float *Id, fl
     *Id =   Ialpha * c + Ibeta * s;
     *Iq = - Ialpha * s + Ibeta * c;
 }
-
+//反park变换
 inline void inverse_park(float mod_d, float mod_q, float Theta, float *mod_alpha, float *mod_beta)
 {
     float s = sin_f32(Theta);

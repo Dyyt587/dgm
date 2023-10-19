@@ -100,7 +100,7 @@ void FOC_voltage(float Vd_set, float Vq_set, float phase)
     
     // Used for report
     Foc.i_q = i_q;
-    UTILS_LP_FAST(Foc.i_q_filt, Foc.i_q, 0.01f);
+    UTILS_LP_FAST(Foc.i_q_filt, Foc.i_q, 0.01f);//低通滤波
     Foc.i_d = i_d;
     UTILS_LP_FAST(Foc.i_d_filt, Foc.i_d, 0.01f);
     
@@ -109,7 +109,7 @@ void FOC_voltage(float Vd_set, float Vq_set, float phase)
     float mod_d = V_to_mod * Vd_set;
     float mod_q = V_to_mod * Vq_set;
     
-    // Vector modulation saturation, lock integrator if saturated
+    // Vector modulation saturation, lock integrator if saturated//矢量调制饱和，锁定积分器，如果饱和
     float mod_scalefactor = 0.9f * SQRT3_BY_2 / sqrtf(SQ(mod_d) + SQ(mod_q));
     if (mod_scalefactor < 1.0f) {
         mod_d *= mod_scalefactor;

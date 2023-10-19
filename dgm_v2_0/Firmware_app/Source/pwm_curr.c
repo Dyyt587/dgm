@@ -107,6 +107,7 @@ void PWMC_SwitchOffPWM(void)
     timer_flag_clear(TIMER0, TIMER_FLAG_UP);
 }
 
+//设置占空比使得下臂全部导通
 void PWMC_TurnOnLowSides(void)
 {
     /* Set all duty to 0% */
@@ -127,7 +128,7 @@ void PWMC_TurnOnLowSides(void)
     timer_channel_complementary_output_state_config(TIMER0, TIMER_CH_2, TIMER_CCXN_ENABLE);
 }
 
-int PWMC_CurrentReadingPolarization(void)
+int PWMC_CurrentReadingPolarization(void)//极性//过零点采样吗
 {
     int i = 0;
     int adc_sum_a = 0;

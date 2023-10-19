@@ -112,7 +112,7 @@ void CALIBRATION_loop(void)
 
     static float phase_set;
     static float start_count;
-    
+     
     static int16_t sample_count;
     static float next_sample_time;
     
@@ -123,20 +123,20 @@ void CALIBRATION_loop(void)
         case CS_NULL:
             break;
         
-        case CS_MOTOR_R_START:
+        case CS_MOTOR_R_START://校准初始化
             loop_count = 0;
             voltages[0] = 0.0f;
             mCalibStep = CS_MOTOR_R_LOOP;
             break;
         
         case CS_MOTOR_R_LOOP:
-            voltages[0] += kI * CURRENT_MEASURE_PERIOD * (UsrConfig.calib_current - Foc.i_a);
+            voltages[0] += kI * CURRENT_MEASURE_PERIOD * (UsrConfig.calib_current - Foc.i_a);//得到一个电压值
             
             // Test voltage along phase A
-            FOC_voltage(voltages[0], 0, 0);
+            FOC_voltage(voltages[0], 0, 0);//给a相加电压
             
-            if(loop_count >= num_R_cycles){
-                PWMC_TurnOnLowSides();
+            if(loop_count >= num_R_cycles){//到时间
+                PWMC_TurnOnLowSides();//打开下臂
                 mCalibStep = CS_MOTOR_R_END;
             }
             break;
@@ -146,7 +146,7 @@ void CALIBRATION_loop(void)
             {
                 uint8_t data[4];
                 float_to_data(UsrConfig.motor_phase_resistance, data);
-                CAN_calib_report(1, data);
+                CAN_calib_report(1, data);//回报一个数据
             }
             mCalibStep = CS_MOTOR_L_START;
             break;
@@ -157,7 +157,7 @@ void CALIBRATION_loop(void)
             Ialphas[1] = 0.0f;
             voltages[0] = -UsrConfig.calib_voltage;
             voltages[1] = +UsrConfig.calib_voltage;
-            FOC_voltage(voltages[0], 0, 0);
+            FOC_voltage(voltages[0], 0, 0);//给电压
             mCalibStep = CS_MOTOR_L_LOOP;
             break;
         
@@ -167,7 +167,7 @@ void CALIBRATION_loop(void)
                 Ialphas[i] += Foc.i_a;
                 
                 // Test voltage along phase A
-                FOC_voltage(voltages[i], 0, 0);
+                FOC_voltage(voltages[i], 0, 0);//给交替电压？
                 
                 if(loop_count >= (num_L_cycles<<1)){
                     PWMC_TurnOnLowSides();

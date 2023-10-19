@@ -181,7 +181,7 @@ static void enter_state(void)
 
 static void exit_state(void)
 {
-    switch(mFSM.state){
+    switch(mFSM.state){//目前要退出的状态
         case BOOT_UP:
             CAN_reset_rx_timeout();
             CAN_reset_tx_timeout();
